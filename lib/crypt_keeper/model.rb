@@ -69,13 +69,13 @@ to be used for encryption"
         end
 
         crypt_keeper_fields.each do |field|
-          serialize field, encryptor
+          serialize field, enkryptor
         end
       end
 
       def search_by_plaintext(field, criteria)
         if crypt_keeper_fields.include?(field.to_sym)
-          encryptor.search(all, field.to_s, criteria)
+          enkryptor.search(all, field.to_s, criteria)
         else
           raise ArgumentError, "#{field} is not a crypt_keeper field"
         end
@@ -91,7 +91,7 @@ to be used for encryption"
         transaction do
           tmp_table.find_each do |r|
             crypt_keeper_fields.each do |field|
-              r.send("#{field}=", encryptor.encrypt(r[field])) if r[field].present?
+              r.send("#{field}=", enkryptor.encrypt(r[field])) if r[field].present?
             end
 
             r.save!
@@ -106,7 +106,7 @@ to be used for encryption"
         transaction do
           tmp_table.find_each do |r|
             crypt_keeper_fields.each do |field|
-              r.send("#{field}=", encryptor.decrypt(r[field])) if r[field].present?
+              r.send("#{field}=", enkryptor.decrypt(r[field])) if r[field].present?
             end
 
             r.save!
@@ -120,19 +120,19 @@ to be used for encryption"
       def encryptor_klass
         @encryptor_klass ||= "CryptKeeper::Provider::#{crypt_keeper_encryptor.to_s.camelize}".constantize
       rescue NameError
-        # couldn’t constantize... 
+        # couldn’t constantize...
         nil
       end
 
       # Private: The encryptor instance.
-      def encryptor
-        @encryptor ||= encryptor_klass.new(crypt_keeper_options)
+      def enkryptor
+        @enkryptor ||= encryptor_klass.new(crypt_keeper_options)
       end
 
       # Private: Ensure we have a valid encryptor.
       def ensure_valid_encryptor!
         unless defined?(encryptor_klass) && encryptor_klass.respond_to?(:new) &&
-          %i(load dump).all? { |m| encryptor.respond_to?(m) }
+          %i(load dump).all? { |m| enkryptor.respond_to?(m) }
           raise ArgumentError, "You must specify a valid encryptor that implements " \
             "the `load` and `dump` methods (you can inherit from CryptKeeper::Provider::Base). Example: `crypt_keeper :encryptor => :aes`"
         end
